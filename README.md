@@ -24,6 +24,14 @@ npm run preview    # preview hasil build
 npm run simulate   # uji duel headless (12 kombinasi kelas)
 ```
 
+## Tautan
+
+- **Live (public):** https://htmlpreview.github.io/?https://raw.githubusercontent.com/ujinnhebatt-coder/ball-vs-ball/gh-pages/index.html
+- **GitHub Pages (resmi):** https://ujinnhebatt-coder.github.io/ball-vs-ball/
+ Aktifkan dulu di `Settings → Pages → Build and deployment → Source: GitHub Actions`;
+  workflow `.github/workflows/deploy.yml` lalu ter-deploy otomatis.
+- Build statis tersedia di branch `gh-pages`.
+
 ## Struktur
 
 ```text
