@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:relative": "tsc --noEmit && BASE_PATH=./ vite build",
+    "build:single": "tsc --noEmit && vite build && node scripts/inline-build.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "simulate": "node --experimental-strip-types scripts/simulate.ts"
