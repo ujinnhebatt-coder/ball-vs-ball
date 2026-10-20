@@ -48,7 +48,7 @@ scripts/
 ## Aturan duel (Fase 1)
 
 - Damage serangan dasar: `max(1, Attack − Defense)`, cooldown 1 detik.
-- Arena lingkaran radius 400 unit; bola terpantul di dinding dan saling dorong saat bertabrakan.
+- Arena persegi 800 × 800 unit; bola terpantul di dinding dan saling dorong saat bertabrakan.
 - AI memakai finite state machine: `Idle → Chase → Attack → Recover → Defeated`,
   dengan profil perilaku berbeda per kelas (agresivitas, jarak preferred, waktu recover).
 - Duel berakhir ketika HP salah satu bola habis.

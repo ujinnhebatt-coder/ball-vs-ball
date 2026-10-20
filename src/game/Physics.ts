@@ -1,5 +1,5 @@
 import {
-  ARENA_RADIUS,
+  ARENA_HALF_SIZE,
   BALL_RESTITUTION,
   LINEAR_DAMPING,
   MAX_COLLISION_SPEED,
@@ -53,28 +53,37 @@ export function integrate(ball: Ball, dt: number): void {
 }
 
 /**
- * Benturan bola dengan dinding arena lingkaran.
- * Memantulkan velocity dan menaruh bola tepat di dalam batas (tidak menembus).
+ * Benturan bola dengan dinding arena persegi.
+ * Memantulkan velocity per sumbu dan menaruh bola tepat di dalam batas
+ * (tidak menembus dinding, termasuk di sudut).
  */
-export function collideWithArena(ball: Ball, arenaRadius: number = ARENA_RADIUS): boolean {
-  const dist = Math.hypot(ball.x, ball.y)
-  const limit = arenaRadius - ball.radius
-  if (dist <= limit) return false
+export function collideWithArena(ball: Ball, arenaHalf: number = ARENA_HALF_SIZE): boolean {
+  const limit = arenaHalf - ball.radius
+  let collided = false
 
-  const normal = normalize(ball.x, ball.y)
-  // Dorong bola keluar dari dinding (posisi dipatok ke radius limit).
-  ball.x = normal.x * limit
-  ball.y = normal.y * limit
-
-  // Hanya pantulkan jika bola bergerak ke arah keluar.
-  const outward = ball.vx * normal.x + ball.vy * normal.y
-  if (outward > 0) {
-    const vx = ball.vx - (1 + WALL_RESTITUTION) * outward * normal.x
-    const vy = ball.vy - (1 + WALL_RESTITUTION) * outward * normal.y
-    ball.vx = vx
-    ball.vy = vy
+  // Dinding kiri & kanan.
+  if (ball.x < -limit) {
+    ball.x = -limit
+    if (ball.vx < 0) ball.vx = -ball.vx * WALL_RESTITUTION
+    collided = true
+  } else if (ball.x > limit) {
+    ball.x = limit
+    if (ball.vx > 0) ball.vx = -ball.vx * WALL_RESTITUTION
+    collided = true
   }
-  return true
+
+  // Dinding atas & bawah.
+  if (ball.y < -limit) {
+    ball.y = -limit
+    if (ball.vy < 0) ball.vy = -ball.vy * WALL_RESTITUTION
+    collided = true
+  } else if (ball.y > limit) {
+    ball.y = limit
+    if (ball.vy > 0) ball.vy = -ball.vy * WALL_RESTITUTION
+    collided = true
+  }
+
+  return collided
 }
 
 /**
@@ -124,11 +133,40 @@ export function collideBalls(a: Ball, b: Ball): boolean {
   return true
 }
 
-/** Mengembalikan true jika titik berada di dalam arena (untuk AI menjauh dari dinding). */
+/** Jarak bola ke dinding arena terdekat (untuk AI menghindari dinding). */
 export function distanceToArenaEdge(
   x: number,
   y: number,
-  arenaRadius: number = ARENA_RADIUS,
+  arenaHalf: number = ARENA_HALF_SIZE,
 ): number {
-  return arenaRadius - Math.hypot(x, y)
+  return Math.min(arenaHalf - Math.abs(x), arenaHalf - Math.abs(y))
+}
+
+/**
+ * Menggerakkan velocity bola mendekati velocity target dengan batas
+ * percepatan/perlambatan (model "seek"), sehingga gerak AIhalus dan
+ * kecepatan akhirnya persis mengikuti stat Speed.
+ */
+export function seekVelocity(
+  ball: Ball,
+  targetVx: number,
+  targetVy: number,
+  dt: number,
+  acceleration: number,
+  deceleration: number,
+): void {
+  const dvx = targetVx - ball.vx
+  const dvy = targetVy - ball.vy
+  const distance = Math.hypot(dvx, dvy)
+  if (distance < 1e-6) return
+
+  // Akselerasi saat mengejar, perlambatan saat melambat.
+  const currentSpeed = Math.hypot(ball.vx, ball.vy)
+  const targetSpeed = Math.hypot(targetVx, targetVy)
+  const rate = targetSpeed > currentSpeed ? acceleration : deceleration
+
+  const maxStep = rate * dt
+  const scale = Math.min(1, maxStep / distance)
+  ball.vx += dvx * scale
+  ball.vy += dvy * scale
 }

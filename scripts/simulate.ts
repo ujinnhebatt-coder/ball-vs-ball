@@ -5,8 +5,8 @@
  * Jalankan: npm run simulate
  */
 import { GameEngine } from '../src/game/GameEngine.ts'
-import { FIXED_DT, MAX_BATTLE_DURATION } from '../src/game/constants.ts'
-import { BALL_CLASS_ORDER } from '../src/game/BallClasses.ts'
+import { ARENA_HALF_SIZE, FIXED_DT, MAX_BATTLE_DURATION } from '../src/game/constants.ts'
+import { BALL_CLASS_ORDER, getBallClass } from '../src/game/BallClasses.ts'
 import type { BallClassId, BattleResult } from '../src/types.ts'
 
 interface Row {
@@ -17,6 +17,8 @@ interface Row {
   hits: number
   accuracy: number
   timeout: boolean
+  avgSpeed: number
+  escapedArena: boolean
 }
 
 const rows: Row[] = []
@@ -37,8 +39,24 @@ for (const a of BALL_CLASS_ORDER) {
     engine.start()
 
     const steps = Math.ceil(MAX_BATTLE_DURATION / FIXED_DT)
+    let speedSum = 0
+    let speedSamples = 0
+    let escapedArena = false
+
     for (let i = 0; i < steps && !result; i += 1) {
       engine.update(FIXED_DT, 1)
+
+      for (const ball of engine.balls) {
+        const speed = Math.hypot(ball.vx, ball.vy)
+        speedSum += speed
+        speedSamples += 1
+
+        // Bola tidak boleh keluar dari dinding arena persegi.
+        const limit = ARENA_HALF_SIZE - ball.radius + 0.01
+        if (Math.abs(ball.x) > limit || Math.abs(ball.y) > limit) {
+          escapedArena = true
+        }
+      }
     }
 
     if (!result) {
@@ -50,6 +68,8 @@ for (const a of BALL_CLASS_ORDER) {
         hits: 0,
         accuracy: 0,
         timeout: true,
+        avgSpeed: speedSamples ? speedSum / speedSamples : 0,
+        escapedArena,
       })
       continue
     }
@@ -68,25 +88,28 @@ for (const a of BALL_CLASS_ORDER) {
       hits: totalHits,
       accuracy: totalAttacks > 0 ? (totalHits / totalAttacks) * 100 : 0,
       timeout: finished.duration >= MAX_BATTLE_DURATION,
+      avgSpeed: speedSamples ? speedSum / speedSamples : 0,
+      escapedArena,
     })
   }
 }
 
 console.log('\n== Hasil duel headless ==\n')
 console.log(
-  ['matchup', 'winner', 'duration(s)', 'attacks', 'hits', 'accuracy', 'timeout']
-    .map((h, i) => (i === 0 ? h.padEnd(16) : h.padEnd(14)))
+  ['matchup', 'winner', 'duration(s)', 'attacks', 'hits', 'accuracy', 'avg speed', 'timeout']
+    .map((h) => h.padEnd(14))
     .join(''),
 )
 for (const row of rows) {
   console.log(
     [
-      row.matchup.padEnd(16),
+      row.matchup.padEnd(14),
       row.winner.padEnd(14),
       row.duration.toFixed(1).padEnd(14),
       String(row.attacks).padEnd(14),
       String(row.hits).padEnd(14),
       `${row.accuracy.toFixed(0)}%`.padEnd(14),
+      `${row.avgSpeed.toFixed(0)} u/s`.padEnd(14),
       row.timeout ? 'YES' : 'no',
     ].join(''),
   )
@@ -98,17 +121,26 @@ for (const [name, count] of Object.entries(wins)) {
 }
 
 const timeouts = rows.filter((r) => r.timeout).length
+const escaped = rows.filter((r) => r.escapedArena).length
 const averageDuration = rows.reduce((sum, r) => sum + r.duration, 0) / rows.length
-const averageAccuracy =
-  rows.reduce((sum, r) => sum + r.accuracy, 0) / rows.length
+const averageSpeed = rows.reduce((sum, r) => sum + r.avgSpeed, 0) / rows.length
 
 console.log('\n== Ringkasan ==\n')
-console.log(`Duel timeout     : ${timeouts}/${rows.length}`)
-console.log(`Durasi rata-rata : ${averageDuration.toFixed(1)} detik`)
-console.log(`Akurasi rata-rata: ${averageAccuracy.toFixed(0)}%`)
+console.log(`Duel timeout      : ${timeouts}/${rows.length}`)
+console.log(`Bola keluar arena : ${escaped}/${rows.length}`)
+console.log(`Durasi rata-rata  : ${averageDuration.toFixed(1)} detik`)
+console.log(`Kecepatan rata-rata: ${averageSpeed.toFixed(0)} unit/detik`)
+console.log(
+  `Stat speed kelas   : ${BALL_CLASS_ORDER.map((id) => `${id}=${getBallClass(id).speed}`).join(', ')}`,
+)
 
 if (timeouts > 0) {
   console.error('\nGAGAL: ada duel yang tidak menghasilkan pemenang.')
   process.exit(1)
 }
-console.log('\nOK: semua duel menghasilkan pemenang.')
+if (escaped > 0) {
+  console.error('\nGAGAL: ada bola yang keluar dari dinding arena.')
+  process.exit(1)
+}
+console.log('\nOK: semua duel menghasilkan pemenang dan bola tetap di dalam arena.')
+

@@ -2,7 +2,7 @@ import { updateAI } from './AIController.ts'
 import { getBallClass } from './BallClasses.ts'
 import { performBasicAttack, tickAttackCooldown, type BallCombatStats } from './CombatSystem.ts'
 import {
-  ARENA_RADIUS,
+  ARENA_HALF_SIZE,
   BALL_RADIUS,
   FIXED_DT,
   MAX_BATTLE_DURATION,
@@ -46,7 +46,7 @@ export class GameEngine {
   /** True saat duel ditahan (pause). */
   paused = false
   elapsed = 0
-  arenaRadius = ARENA_RADIUS
+  arenaHalf = ARENA_HALF_SIZE
   floatingTexts: FloatingText[] = []
   sparks: CollisionSpark[] = []
   stats: Record<number, BallCombatStats> = {}
@@ -71,8 +71,12 @@ export class GameEngine {
     this.sparks = []
     this.stats = {}
 
-    const spawnRadius = this.arenaRadius * 0.55
-    this.balls = [this.createBall(classA, -spawnRadius, 0), this.createBall(classB, spawnRadius, 0)]
+    // Spawn saling berlawanan di sisi kiri-kanan arena persegi.
+    const spawnOffset = this.arenaHalf * 0.75
+    this.balls = [
+      this.createBall(classA, -spawnOffset, 0),
+      this.createBall(classB, spawnOffset, 0),
+    ]
     for (const ball of this.balls) {
       this.stats[ball.id] = { damageDealt: 0, damageTaken: 0, attacks: 0, hits: 0 }
     }
@@ -163,13 +167,13 @@ export class GameEngine {
     }
 
     // 2) AI menentukan gerakan & aksi.
-    updateAI(a, b, dt, this.arenaRadius)
-    updateAI(b, a, dt, this.arenaRadius)
+    updateAI(a, b, dt, this.arenaHalf)
+    updateAI(b, a, dt, this.arenaHalf)
 
     // 3) Fisika: integrasi + constraint.
     for (const ball of this.balls) {
       integrate(ball, dt)
-      collideWithArena(ball, this.arenaRadius)
+      collideWithArena(ball, this.arenaHalf)
       clampSpeed(ball)
     }
 

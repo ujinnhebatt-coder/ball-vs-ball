@@ -52,8 +52,8 @@ Ulangi duel atau pilih kombinasi bola baru.
 ### 5\. Arena Design
 ![Save 50% on Hyper Shapes on Steam](https://images.openai.com/static-rsc-4/E07FUhExZlXnknXezajKpCJfu1DPCd0T-Wb2sptf7xyKSLehBZAm_PK-1sAH2N0lAnoF0e-Ku8SwoIx9JEGaaowvR2OO7zBD_K5ia8FeLPW-zrBpEBempjQsA8Wkaxoi2NPSveycwX2aWVjHA-AMtkNeyKNCjhy8kM1-PGxNgp2lKN_FBx4indtDe1l0OTlz?purpose=fullsize)
 Arena menggunakan tampilan 2D dari atas (top-down view).
-| Elemen          | Spesifikasi                   || --------------- | ----------------------------- || Bentuk          | Lingkaran                     || Ukuran awal     | 800 × 800 unit virtual        || Batas arena     | Dinding yang memantulkan bola || Jumlah petarung | 2 bola                        || Titik spawn     | Saling berlawanan             || Hazard          | Tidak ada pada MVP            || Kamera          | Tetap, mengikuti arena        |
-Arena harus memiliki batas yang jelas agar bola tidak keluar dari area pertarungan. Efek visual dapat berupa garis neon, lingkaran energi, dan partikel benturan.
+| Elemen          | Spesifikasi                   || --------------- | ----------------------------- || Bentuk          | Persegi                         || Ukuran awal     | 800 × 800 unit virtual        || Batas arena     | Dinding yang memantulkan bola || Jumlah petarung | 2 bola                        || Titik spawn     | Saling berlawanan             || Hazard          | Tidak ada pada MVP            || Kamera          | Tetap, mengikuti arena        |
+Arena berbentuk persegi 800 × 800 unit virtual dengan dinding yang memantulkan bola, agar bola tidak keluar dari area pertarungan. Efek visual dapat berupa garis neon, lingkaran energi, dan partikel benturan.
 ### 6\. Ball Classes
 Versi awal menyediakan empat kelas bola.
 ![Vector illustration of a glowing magical fire sphere.](https://images.openai.com/static-rsc-4/oieec5NXA_ldRyFZwr0-209b7Hx1tdcTEEE8j_ZHv_Wnp5z8IO2zZ-GB9q_E6MnFV8Th7Ln26lHR2ZppjdqjbT6yhSRgIq3giboqzpBeYsdGCCW2Ik0RGL9P94eDq_fF982s3tCLZ3yARQ0klIIr1QYDiTVWX9dvhesqxLG5yBhPkJxJ5UULmPK7XA3sNET6?purpose=fullsize)
@@ -81,7 +81,7 @@ Nature Ball
 * Efek: memulihkan 15 HP.
 * Kelemahan: damage dasar rendah.
 ### Statistik awal
-| Statistik    | Fire | Ice | Thunder | Nature || ------------ | ---- | --- | ------- | ------ || HP           | 100  | 110 | 85      | 120    || Attack       | 12   | 9   | 10      | 8      || Defense      | 1    | 3   | 1       | 4      || Speed        | 120  | 100 | 155     | 90     || Attack range | 80   | 80  | 80      | 80     |
+| Statistik    | Fire | Ice | Thunder | Nature || ------------ | ---- | --- | ------- | ------ || HP           | 100  | 110 | 85      | 120    || Attack       | 12   | 9   | 10      | 8      || Defense      | 1    | 3   | 1       | 4      || Speed        | 165  | 140 | 215     | 125     || Attack range | 80   | 80  | 80      | 80     |
 Semua angka merupakan nilai awal untuk pengujian. Statistik akhir ditentukan melalui playtesting dan balancing.
 ### 7\. Combat System
 ### Serangan dasar

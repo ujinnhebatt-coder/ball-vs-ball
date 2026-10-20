@@ -1,4 +1,4 @@
-import { ARENA_RADIUS, HIT_FLASH_DURATION } from './constants.ts'
+import { ARENA_SIZE, HIT_FLASH_DURATION } from './constants.ts'
 import type { GameEngine } from './GameEngine.ts'
 import type { Ball } from '../types.ts'
 
@@ -42,7 +42,7 @@ export class Renderer {
 
     // Arena mengikuti sisi terpendek dan dipusatkan.
     const size = Math.min(cssWidth, cssHeight)
-    this.scale = size / (ARENA_RADIUS * 2)
+    this.scale = size / ARENA_SIZE
     this.offsetX = cssWidth / 2
     this.offsetY = cssHeight / 2
   }
@@ -59,37 +59,36 @@ export class Renderer {
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.width, this.height)
 
-    this.drawArena(engine.arenaRadius)
+    this.drawArena(engine.arenaHalf)
     this.drawSparks(engine)
     for (const ball of engine.balls) this.drawBall(ball)
     this.drawFloatingTexts(engine)
   }
 
-  private drawArena(arenaRadius: number): void {
+  private drawArena(arenaHalf: number): void {
     const ctx = this.ctx
     const center = this.toCanvas(0, 0)
-    const radius = arenaRadius * this.scale
+    const half = arenaHalf * this.scale
 
     ctx.save()
     ctx.fillStyle = PALETTE.arenaFill
-    ctx.beginPath()
-    ctx.arc(center.x, center.y, radius, 0, Math.PI * 2)
-    ctx.fill()
+    ctx.fillRect(center.x - half, center.y - half, half * 2, half * 2)
 
     ctx.strokeStyle = PALETTE.arenaStroke
     ctx.lineWidth = 3
-    ctx.stroke()
+    ctx.strokeRect(center.x - half, center.y - half, half * 2, half * 2)
 
-    // Lingkaran dekoratif tipis di dalam arena.
+    // Panduan dekoratif: garis tengah + kotak dalam.
     ctx.strokeStyle = PALETTE.guide
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.arc(center.x, center.y, radius * 0.66, 0, Math.PI * 2)
+    ctx.moveTo(center.x - half, center.y)
+    ctx.lineTo(center.x + half, center.y)
+    ctx.moveTo(center.x, center.y - half)
+    ctx.lineTo(center.x, center.y + half)
     ctx.stroke()
 
-    ctx.beginPath()
-    ctx.arc(center.x, center.y, radius * 0.33, 0, Math.PI * 2)
-    ctx.stroke()
+    ctx.strokeRect(center.x - half * 0.5, center.y - half * 0.5, half, half)
     ctx.restore()
   }
 

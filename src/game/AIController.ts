@@ -1,18 +1,22 @@
 import { getBallClass } from './BallClasses.ts'
-import { MIN_STEER_SPEED } from './constants.ts'
-import { distanceToArenaEdge, normalize } from './Physics.ts'
+import { AI_ACCELERATION, AI_DECELERATION, MIN_STEER_SPEED } from './constants.ts'
+import { distanceToArenaEdge, normalize, seekVelocity } from './Physics.ts'
 import type { AIState, Ball } from '../types.ts'
 
 /**
  * Finite state machine AI (GDD bagian 8).
  * Fase 1 memakai subset: Idle, Chase, Attack, Recover, Defeated.
  * State Skill akan menyusul di fase 2 bersama implementasi skill.
+ *
+ * Model gerak: "seek" — bola selalu menyeberangi velocity target
+ * (arah × stat Speed) dengan percepatan terbatas. Efeknya kecepatan bola
+ * sesuai stat, gerakan halus, dan momentum knockback tetap terlihat.
  */
 export function updateAI(
   self: Ball,
   opponent: Ball,
   dt: number,
-  arenaRadius: number,
+  arenaHalf: number,
 ): AIState {
   if (self.hp <= 0) {
     self.aiState = 'defeated'
@@ -24,9 +28,8 @@ export function updateAI(
   if (self.recoverTimer > 0) {
     self.recoverTimer = Math.max(0, self.recoverTimer - dt)
     self.aiState = 'recover'
-    // Sisa-sisa momentum tetap meredup supaya bola bisa kembali bergerak.
-    self.vx *= 0.92
-    self.vy *= 0.92
+    // Melambat menuju diam supaya momentum knockback tetap terlihat.
+    seekVelocity(self, 0, 0, dt, AI_DECELERATION, AI_DECELERATION)
     return 'recover'
   }
 
@@ -36,12 +39,8 @@ export function updateAI(
   const dir = normalize(dx, dy)
   self.facing = Math.atan2(dy, dx)
 
-  // Kecepatan decay saat tidak ada dorongan AI (damping alami + drag ringan).
-  self.vx *= 0.9
-  self.vy *= 0.9
-
-  // Hindari dinding berlaku di semua state.
-  const edgeDistance = distanceToArenaEdge(self.x, self.y, arenaRadius)
+  // Hindari dinding berlaku di semua state (arah ke tengah arena).
+  const edgeDistance = distanceToArenaEdge(self.x, self.y, arenaHalf)
   let wallSteerX = 0
   let wallSteerY = 0
   if (edgeDistance < self.radius * 4) {
@@ -57,12 +56,23 @@ export function updateAI(
     self.repositionTimer = Math.max(0, self.repositionTimer - dt)
     const away = normalize(-dx, -dy)
     const orbitSign = self.id % 2 === 0 ? 1 : -1
-    self.vx +=
-      (away.x * 1.2 + -away.y * orbitSign * 0.6) * self.speed * profile.steerForce * dt * 3
-    self.vy +=
-      (away.y * 1.2 + away.x * orbitSign * 0.6) * self.speed * profile.steerForce * dt * 3
-    self.vx += wallSteerX * self.speed * dt * 3
-    self.vy += wallSteerY * self.speed * dt * 3
+    let steerX = away.x * 1.2 + -away.y * orbitSign * 0.6
+    let steerY = away.y * 1.2 + away.x * orbitSign * 0.6
+    const steerLength = Math.hypot(steerX, steerY) || 1
+    steerX /= steerLength
+    steerY /= steerLength
+
+    steerX += wallSteerX
+    steerY += wallSteerY
+    const steerLen2 = Math.hypot(steerX, steerY) || 1
+    seekVelocity(
+      self,
+      (steerX / steerLen2) * self.speed * 1.1,
+      (steerY / steerLen2) * self.speed * 1.1,
+      dt,
+      AI_ACCELERATION,
+      AI_DECELERATION,
+    )
     self.aiState = 'chase'
     return 'chase'
   }
@@ -74,23 +84,21 @@ export function updateAI(
     // Orbit: saat dalam jangkauan, bola mengitari lawan (berlawanan arah
     // dengan lawan) alih-alih menempel, supaya duel tidak terlihat diam.
     const orbitSign = self.id % 2 === 0 ? 1 : -1
-    const orbitForce = self.speed * 0.9 * profile.steerForce
-    self.vx += -dir.y * orbitSign * orbitForce * dt * 3
-    self.vy += dir.x * orbitSign * orbitForce * dt * 3
-
-    // Dorong ringan ke arah lawan saat menyerang (lunge kecil).
-    self.vx += dir.x * profile.steerForce * 18 * dt
-    self.vy += dir.y * profile.steerForce * 18 * dt
+    const orbitSpeed = self.speed * 0.9 * profile.steerForce
+    let targetVx = -dir.y * orbitSign * orbitSpeed + dir.x * 40
+    let targetVy = dir.x * orbitSign * orbitSpeed + dir.y * 40
 
     // Jika terlalu berdekatan, menjauh sedikit agar tidak bertumpuk.
     if (distance < self.radius + opponent.radius + 6) {
-      self.vx -= dir.x * 60 * dt
-      self.vy -= dir.y * 60 * dt
+      targetVx -= dir.x * 90
+      targetVy -= dir.y * 90
     }
 
     // Di dekat dinding, koreksi arah agar tetap di dalam arena.
-    self.vx += wallSteerX * self.speed * dt * 3
-    self.vy += wallSteerY * self.speed * dt * 3
+    targetVx += wallSteerX * self.speed
+    targetVy += wallSteerY * self.speed
+
+    seekVelocity(self, targetVx, targetVy, dt, AI_ACCELERATION, AI_DECELERATION)
     return 'attack'
   }
 
@@ -115,10 +123,16 @@ export function updateAI(
     steerY /= steerLength
   }
 
-  // Kecepatan target AI mengikuti speed stat bola.
+  // Kecepatan target mengikuti stat Speed bola.
   const targetSpeed = self.speed * (tooClose ? 0.85 : 1)
-  self.vx += steerX * targetSpeed * profile.steerForce * dt * 4
-  self.vy += steerY * targetSpeed * profile.steerForce * dt * 4
+  seekVelocity(
+    self,
+    steerX * targetSpeed,
+    steerY * targetSpeed,
+    dt,
+    AI_ACCELERATION,
+    AI_DECELERATION,
+  )
 
   // Jaga kecepatan minimum supaya bola tidak diam di tengah arena.
   const speed = Math.hypot(self.vx, self.vy)
