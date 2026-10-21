@@ -37,8 +37,9 @@ export function updateAI(
   if (self.recoverTimer > 0) {
     self.recoverTimer = Math.max(0, self.recoverTimer - dt)
     self.aiState = 'recover'
-    // Melambat menuju diam supaya momentum knockback tetap terlihat.
-    seekVelocity(self, 0, 0, dt, AI_DECELERATION, AI_DECELERATION)
+    // Tidak ada steering sama sekali: momentum knockback meredup secara
+    // natural lewat damping, bukan dipaksa melambat. Dengan begitu
+    // pantulan benturan terasa nyata.
     return 'recover'
   }
 
@@ -52,11 +53,13 @@ export function updateAI(
   const edgeDistance = distanceToArenaEdge(self.x, self.y, arenaHalf)
   let wallSteerX = 0
   let wallSteerY = 0
-  if (edgeDistance < self.radius * 4) {
+  // Penghindaran dinding sengaja ringan: bola boleh memakai seluruh arena
+  // dan memantul di dinding, bukan terkurung di tengah.
+  if (edgeDistance < self.radius * 2) {
     const inward = normalize(-self.x, -self.y)
-    const urgency = 1 - edgeDistance / (self.radius * 4)
-    wallSteerX = inward.x * urgency * 2.4
-    wallSteerY = inward.y * urgency * 2.4
+    const urgency = 1 - edgeDistance / (self.radius * 2)
+    wallSteerX = inward.x * urgency * 1.0
+    wallSteerY = inward.y * urgency * 1.0
   }
 
   // 1) Mundur sebentar setelah berhasil mengenai lawan: membuka jarak,

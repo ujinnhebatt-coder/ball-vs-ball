@@ -10,7 +10,8 @@
     "build:single": "tsc --noEmit && vite build && node scripts/inline-build.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "simulate": "node --experimental-strip-types scripts/simulate.ts"
+    "simulate": "node --experimental-strip-types scripts/simulate.ts",
+    "physics": "node --experimental-strip-types scripts/physics-check.ts"
   },
   "dependencies": {
     "react": "^19.3.0",

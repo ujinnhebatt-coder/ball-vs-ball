@@ -105,6 +105,11 @@ Collision digunakan untuk mendeteksi:
 * Proyektil mengenai target.
 * Serangan menghasilkan knockback.
 Bola tidak boleh menembus dinding atau terus bertumpuk dengan bola lawan akibat tabrakan.
+Aturan gerak:
+* Momentum dijaga: gesekan ringan (0,25 per detik) sehingga bola yang dipantulkan dinding tetap bereaksi dan knockback bertahan beberapa detik.
+* Pantulan dinding memakai restitusi 0,9; komponen velocity yang terlalu kecil di-nol-kan agar bola tidak getar menempel di dinding.
+* Sudut pantulan hanya berubah karena energi yang hilang pada sumbu normal.
+* AI tidak boleh membatalkan knockback secara instan; setelah terkena benturan, bola meluncur mengikuti momentum sebelum AI mengambil alih.
 ### 8\. AI System
 AI mengatur perilaku kedua bola menggunakan finite state machine.
 | State    | Perilaku                                  || -------- | ----------------------------------------- || Idle     | Menunggu pertandingan dimulai             || Launch  | Bola meluncur ke arah yang dipilih pemain sebelum AI mengambil alih              || Chase    | Bergerak mendekati lawan                  || Attack   | Menyerang saat target terjangkau          || Skill    | Mengaktifkan kemampuan khusus             || Recover  | Menstabilkan gerakan setelah terkena efek || Defeated | Menghentikan seluruh aksi                 |

@@ -1,6 +1,7 @@
 import {
   ARENA_HALF_SIZE,
   BALL_RESTITUTION,
+  BOUNCE_DEADZONE,
   LINEAR_DAMPING,
   MAX_COLLISION_SPEED,
   MAX_SPEED,
@@ -53,6 +54,15 @@ export function integrate(ball: Ball, dt: number): void {
 }
 
 /**
+ * Memantulkan satu komponen velocity dengan restitusi.
+ * Komponen yang sangat kecil di-nol-kan agar bola tidak getar di dinding.
+ */
+function reflect(velocity: number, restitution: number): number {
+  const bounced = -velocity * restitution
+  return Math.abs(bounced) < BOUNCE_DEADZONE ? 0 : bounced
+}
+
+/**
  * Benturan bola dengan dinding arena persegi.
  * Memantulkan velocity per sumbu dan menaruh bola tepat di dalam batas
  * (tidak menembus dinding, termasuk di sudut).
@@ -64,22 +74,22 @@ export function collideWithArena(ball: Ball, arenaHalf: number = ARENA_HALF_SIZE
   // Dinding kiri & kanan.
   if (ball.x < -limit) {
     ball.x = -limit
-    if (ball.vx < 0) ball.vx = -ball.vx * WALL_RESTITUTION
+    if (ball.vx < 0) ball.vx = reflect(ball.vx, WALL_RESTITUTION)
     collided = true
   } else if (ball.x > limit) {
     ball.x = limit
-    if (ball.vx > 0) ball.vx = -ball.vx * WALL_RESTITUTION
+    if (ball.vx > 0) ball.vx = reflect(ball.vx, WALL_RESTITUTION)
     collided = true
   }
 
   // Dinding atas & bawah.
   if (ball.y < -limit) {
     ball.y = -limit
-    if (ball.vy < 0) ball.vy = -ball.vy * WALL_RESTITUTION
+    if (ball.vy < 0) ball.vy = reflect(ball.vy, WALL_RESTITUTION)
     collided = true
   } else if (ball.y > limit) {
     ball.y = limit
-    if (ball.vy > 0) ball.vy = -ball.vy * WALL_RESTITUTION
+    if (ball.vy > 0) ball.vy = reflect(ball.vy, WALL_RESTITUTION)
     collided = true
   }
 

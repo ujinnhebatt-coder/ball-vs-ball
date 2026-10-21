@@ -18,11 +18,14 @@ export const ARENA_HALF_SIZE = ARENA_SIZE / 2
 /** Radius tiap bola (unit). */
 export const BALL_RADIUS = 20
 
-/** Gesekan/damping velocity per detik (0..1) — terutama meredam momentum knockback. */
-export const LINEAR_DAMPING = 1.2
+/** Gesekan/damping velocity per detik (0..1) — meredam momentum secara wajar. */
+export const LINEAR_DAMPING = 0.25
 
 /** Restitusi benturan dengan dinding arena. */
-export const WALL_RESTITUTION = 0.85
+export const WALL_RESTITUTION = 0.9
+
+/** Komponen velocity normal di bawah nilai ini di-nol-kan setelah pantul (anti-getar). */
+export const BOUNCE_DEADZONE = 8
 
 /** Restitusi benturan antar bola. */
 export const BALL_RESTITUTION = 0.9
@@ -58,10 +61,10 @@ export const MAX_SPEED = 560
 export const MAX_BATTLE_DURATION = 120
 
 /** Durasi luncur bebas sebelum AI mengambil alih kendali (detik). */
-export const LAUNCH_DURATION = 1.5
+export const LAUNCH_DURATION = 1.8
 
 /** Kecepatan luncur awal bola sesuai arah yang dipilih (unit/detik). */
-export const LAUNCH_SPEED = 150
+export const LAUNCH_SPEED = 210
 
 /** Jarak Picking bola saat klik/tarik panah arah (px toleransi di layar). */
 export const AIM_PICK_TOLERANCE = 42

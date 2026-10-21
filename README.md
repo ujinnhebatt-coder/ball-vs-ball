@@ -22,6 +22,7 @@ npm run dev        # dev server di http://localhost:5173
 npm run build      # typecheck + build produksi ke dist/
 npm run preview    # preview hasil build
 npm run simulate   # uji duel headless (12 kombinasi kelas)
+npm run physics    # uji fisika arena (pantul, penetrasi, overlap, knockback)
 ```
 
 ## Tautan
@@ -49,6 +50,8 @@ scripts/
 
 - Damage serangan dasar: `max(1, Attack − Defense)`, cooldown 1 detik.
 - Arena persegi 800 × 800 unit; bola terpantul di dinding dan saling dorong saat bertabrakan.
+- Momentum dijaga: gesekan ringan (0,25/detik) dan restitusi dinding 0,9, sehingga pantulan
+  terasa nyata dan knockback tidak langsung dibatalkan AI.
 - AI memakai finite state machine: `Idle → Launch → Chase → Attack → Recover → Defeated`,
   dengan profil perilaku berbeda per kelas (agresivitas, jarak preferred, waktu recover).
 - Duel berakhir ketika HP salah satu bola habis.
