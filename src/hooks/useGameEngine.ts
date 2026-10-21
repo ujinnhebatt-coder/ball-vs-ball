@@ -80,9 +80,26 @@ export function useGameEngine({ classA, classB, onBattleEnd }: UseGameEngineOpti
     return () => window.clearInterval(interval)
   }, [engine])
 
-  const start = useCallback(() => {
-    engine.start()
+  /** Melepas bola ke arena sesuai arah yang dipilih (fase aim -> running). */
+  const launch = useCallback(() => {
+    engine.launch()
     setIsPaused(engine.paused)
+    setHud(engine.getHudSnapshot())
+  }, [engine])
+
+  /** Mengatur arah luncur sebuah bola. */
+  const setAimAngle = useCallback(
+    (ballId: number, angle: number) => {
+      engine.setAimAngle(ballId, angle)
+      setHud(engine.getHudSnapshot())
+    },
+    [engine],
+  )
+
+  /** Mengatur arah acak untuk kedua bola. */
+  const randomizeAim = useCallback(() => {
+    engine.randomizeAim()
+    setHud(engine.getHudSnapshot())
   }, [engine])
 
   const togglePause = useCallback(() => {
@@ -100,10 +117,20 @@ export function useGameEngine({ classA, classB, onBattleEnd }: UseGameEngineOpti
 
   const restart = useCallback(() => {
     engine.reset(classA, classB)
-    engine.start()
     setIsPaused(engine.paused)
     setHud(engine.getHudSnapshot())
   }, [engine, classA, classB])
 
-  return { engine, hud, start, restart, togglePause, isPaused, speed, setSpeed }
+  return {
+    engine,
+    hud,
+    launch,
+    setAimAngle,
+    randomizeAim,
+    restart,
+    togglePause,
+    isPaused,
+    speed,
+    setSpeed,
+  }
 }

@@ -387,6 +387,100 @@ body {
   max-height: 100%;
 }
 
+.arena-canvas.is-aiming {
+  cursor: grab;
+}
+
+.arena-canvas.is-aiming:active {
+  cursor: grabbing;
+}
+
+/* ---------- Aim panel (sebelum duel) ---------- */
+.aim-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aim-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.aim-title {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.aim-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 460px;
+}
+
+.aim-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.aim-balls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.aim-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-alt);
+  font: inherit;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.aim-card:hover {
+  border-color: #b9c4d4;
+}
+
+.aim-card.is-active {
+  border-color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--text) inset;
+}
+
+.aim-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.aim-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.aim-angle {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  min-width: 42px;
+  text-align: right;
+}
+
 /* ---------- HUD ---------- */
 .hud {
   display: flex;

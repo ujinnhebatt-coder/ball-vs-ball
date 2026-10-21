@@ -38,22 +38,25 @@ Pemain tidak mengendalikan gerakan bola secara langsung. Setelah pertandingan di
 Pilih Bola
 Pilih dua kelas bola dengan kemampuan berbeda.
 02
-Mulai Duel
-Kedua bola muncul di arena.
+Tentukan Arah
+Pemain menentukan arah luncur setiap bola dengan menyeret panah pada arena.
 03
+Mulai Duel
+Kedua bola muncul di arena lalu meluncur ke arah yang dipilih.
+04
 Auto Battle
 AI mengejar, menyerang, menghindar, dan memakai skill.
-04
+05
 Hasil Pertandingan
 Satu bola menang ketika HP lawan habis.
-05
+06
 Rematch
 Ulangi duel atau pilih kombinasi bola baru.
 ### 5\. Arena Design
 ![Save 50% on Hyper Shapes on Steam](https://images.openai.com/static-rsc-4/E07FUhExZlXnknXezajKpCJfu1DPCd0T-Wb2sptf7xyKSLehBZAm_PK-1sAH2N0lAnoF0e-Ku8SwoIx9JEGaaowvR2OO7zBD_K5ia8FeLPW-zrBpEBempjQsA8Wkaxoi2NPSveycwX2aWVjHA-AMtkNeyKNCjhy8kM1-PGxNgp2lKN_FBx4indtDe1l0OTlz?purpose=fullsize)
 Arena menggunakan tampilan 2D dari atas (top-down view).
 | Elemen          | Spesifikasi                   || --------------- | ----------------------------- || Bentuk          | Persegi                         || Ukuran awal     | 800 × 800 unit virtual        || Batas arena     | Dinding yang memantulkan bola || Jumlah petarung | 2 bola                        || Titik spawn     | Saling berlawanan             || Hazard          | Tidak ada pada MVP            || Kamera          | Tetap, mengikuti arena        |
-Arena berbentuk persegi 800 × 800 unit virtual dengan dinding yang memantulkan bola, agar bola tidak keluar dari area pertarungan. Efek visual dapat berupa garis neon, lingkaran energi, dan partikel benturan.
+Arena berbentuk persegi 800 × 800 unit virtual dengan dinding yang memantulkan bola, agar bola tidak keluar dari area pertarungan. Visual arena memakai pencahayaan: lantai bertekstur halus dengan grid, bayangan dalam pada dinding, dan vignette di sudut. Bola digambar dengan gradasi 3D, specular highlight, dan bayangan jatuh.
 ### 6\. Ball Classes
 Versi awal menyediakan empat kelas bola.
 ![Vector illustration of a glowing magical fire sphere.](https://images.openai.com/static-rsc-4/oieec5NXA_ldRyFZwr0-209b7Hx1tdcTEEE8j_ZHv_Wnp5z8IO2zZ-GB9q_E6MnFV8Th7Ln26lHR2ZppjdqjbT6yhSRgIq3giboqzpBeYsdGCCW2Ik0RGL9P94eDq_fF982s3tCLZ3yARQ0klIIr1QYDiTVWX9dvhesqxLG5yBhPkJxJ5UULmPK7XA3sNET6?purpose=fullsize)
@@ -104,7 +107,7 @@ Collision digunakan untuk mendeteksi:
 Bola tidak boleh menembus dinding atau terus bertumpuk dengan bola lawan akibat tabrakan.
 ### 8\. AI System
 AI mengatur perilaku kedua bola menggunakan finite state machine.
-| State    | Perilaku                                  || -------- | ----------------------------------------- || Idle     | Menunggu pertandingan dimulai             || Chase    | Bergerak mendekati lawan                  || Attack   | Menyerang saat target terjangkau          || Skill    | Mengaktifkan kemampuan khusus             || Recover  | Menstabilkan gerakan setelah terkena efek || Defeated | Menghentikan seluruh aksi                 |
+| State    | Perilaku                                  || -------- | ----------------------------------------- || Idle     | Menunggu pertandingan dimulai             || Launch  | Bola meluncur ke arah yang dipilih pemain sebelum AI mengambil alih              || Chase    | Bergerak mendekati lawan                  || Attack   | Menyerang saat target terjangkau          || Skill    | Mengaktifkan kemampuan khusus             || Recover  | Menstabilkan gerakan setelah terkena efek || Defeated | Menghentikan seluruh aksi                 |
 AI dievaluasi setiap pembaruan simulasi. Setiap kelas dapat mempunyai prioritas berbeda, misalnya Thunder lebih agresif mengejar lawan, sedangkan Nature lebih mengutamakan bertahan.
 ### 9\. Game UI
 ![Fury Arena](https://images.openai.com/static-rsc-4/Gyz_eSuaSXJgQ5f6Qwq2NWrPMnkB3BXK5lesQBAs5Y5eOt2hvKL4dBzge1jKSEIlo_ah1pTrepJ86Z7ZD1EkSE32rVwySRNvp8dmragLi26n-LiYDXrQgpbI_aO5BZEvE_2cQkgFyiyv4pN_qUU0mSmVbhMTecqXAaNYiDgA5VVcO8s79vclB2ytgJdI4LiL?purpose=fullsize)

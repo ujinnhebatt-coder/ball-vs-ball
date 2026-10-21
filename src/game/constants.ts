@@ -57,5 +57,14 @@ export const MAX_SPEED = 560
 /** Durasi maksimum duel sebelum dianggap timeout (detik). */
 export const MAX_BATTLE_DURATION = 120
 
+/** Durasi luncur bebas sebelum AI mengambil alih kendali (detik). */
+export const LAUNCH_DURATION = 1.5
+
+/** Kecepatan luncur awal bola sesuai arah yang dipilih (unit/detik). */
+export const LAUNCH_SPEED = 150
+
+/** Jarak Picking bola saat klik/tarik panah arah (px toleransi di layar). */
+export const AIM_PICK_TOLERANCE = 42
+
 /** Jumlah pixel fallback untuk rasio DPR. */
 export const MAX_DPR = 2

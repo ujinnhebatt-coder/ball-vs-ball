@@ -23,6 +23,15 @@ interface Row {
 
 const rows: Row[] = []
 const wins: Record<string, number> = {}
+let launchDirectionMismatch = false
+
+/** Selisih sudut minimum antara dua sudut (radian). */
+function normalizeAngle(angle: number): number {
+  let value = angle % (Math.PI * 2)
+  if (value > Math.PI) value -= Math.PI * 2
+  if (value < -Math.PI) value += Math.PI * 2
+  return value
+}
 
 for (const a of BALL_CLASS_ORDER) {
   for (const b of BALL_CLASS_ORDER) {
@@ -36,7 +45,19 @@ for (const a of BALL_CLASS_ORDER) {
         result = r
       },
     })
-    engine.start()
+    // Arah luncur acak supaya skrip juga menguji jalur launch.
+    engine.randomizeAim()
+    engine.launch()
+
+    // Verifikasi arah launch: velocity awal harus searah aimAngle.
+    const launchAngles = engine.balls.map((ball) => {
+      const angle = Math.atan2(ball.vy, ball.vx)
+      const delta = Math.abs(normalizeAngle(angle - ball.aimAngle))
+      return delta
+    })
+    if (launchAngles.some((delta) => delta > (15 * Math.PI) / 180)) {
+      launchDirectionMismatch = true
+    }
 
     const steps = Math.ceil(MAX_BATTLE_DURATION / FIXED_DT)
     let speedSum = 0
@@ -140,6 +161,10 @@ if (timeouts > 0) {
 }
 if (escaped > 0) {
   console.error('\nGAGAL: ada bola yang keluar dari dinding arena.')
+  process.exit(1)
+}
+if (launchDirectionMismatch) {
+  console.error('\nGAGAL: arah luncur tidak sesuai arah yang dipilih.')
   process.exit(1)
 }
 console.log('\nOK: semua duel menghasilkan pemenang dan bola tetap di dalam arena.')

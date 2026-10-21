@@ -25,6 +25,15 @@ export function updateAI(
 
   const profile = getBallClass(self.classId).ai
 
+  // Fase luncur: bola meluncur bebas ke arah yang dipilih pemain,
+  // AI belum mengambil alih kendali.
+  if (self.launchTimer > 0) {
+    self.launchTimer = Math.max(0, self.launchTimer - dt)
+    self.aiState = 'launch'
+    self.facing = self.aimAngle
+    return 'launch'
+  }
+
   if (self.recoverTimer > 0) {
     self.recoverTimer = Math.max(0, self.recoverTimer - dt)
     self.aiState = 'recover'

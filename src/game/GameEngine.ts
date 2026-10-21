@@ -5,6 +5,8 @@ import {
   ARENA_HALF_SIZE,
   BALL_RADIUS,
   FIXED_DT,
+  LAUNCH_DURATION,
+  LAUNCH_SPEED,
   MAX_BATTLE_DURATION,
 } from './constants.ts'
 import { clampSpeed, collideBalls, collideWithArena, integrate } from './Physics.ts'
@@ -65,7 +67,7 @@ export class GameEngine {
     this.nextId = 1
     this.elapsed = 0
     this.accumulator = 0
-    this.phase = 'idle'
+    this.phase = 'aim'
     this.paused = false
     this.floatingTexts = []
     this.sparks = []
@@ -79,6 +81,27 @@ export class GameEngine {
     ]
     for (const ball of this.balls) {
       this.stats[ball.id] = { damageDealt: 0, damageTaken: 0, attacks: 0, hits: 0 }
+    }
+    // Arah awal default: masing-masing menghadap lawan.
+    this.balls[0].aimAngle = 0
+    this.balls[0].facing = 0
+    this.balls[1].aimAngle = Math.PI
+    this.balls[1].facing = Math.PI
+  }
+
+  /** Mengatur arah luncur sebuah bola (radian, 0 = ke kanan). */
+  setAimAngle(ballId: number, angle: number): void {
+    const ball = this.balls.find((b) => b.id === ballId)
+    if (!ball) return
+    ball.aimAngle = angle
+    ball.facing = angle
+  }
+
+  /** Mengatur arah acak untuk kedua bola. */
+  randomizeAim(): void {
+    for (const ball of this.balls) {
+      ball.aimAngle = Math.random() * Math.PI * 2
+      ball.facing = ball.aimAngle
     }
   }
 
@@ -111,14 +134,23 @@ export class GameEngine {
       repositionTimer: 0,
       hitFlash: 0,
       aiState: 'idle',
+      aimAngle: x < 0 ? 0 : Math.PI,
+      launchTimer: 0,
       facing: x < 0 ? 0 : Math.PI,
     }
   }
 
-  start(): void {
-    if (this.phase === 'finished') return
+  /** Melepas bola dengan kecepatan awal sesuai arah yang dipilih pemain. */
+  launch(): void {
+    if (this.phase !== 'aim') return
     this.phase = 'running'
     this.paused = false
+    for (const ball of this.balls) {
+      ball.vx = Math.cos(ball.aimAngle) * LAUNCH_SPEED
+      ball.vy = Math.sin(ball.aimAngle) * LAUNCH_SPEED
+      ball.launchTimer = LAUNCH_DURATION
+      ball.aiState = 'launch'
+    }
   }
 
   pause(): void {
@@ -269,6 +301,7 @@ export class GameEngine {
         aiState: ball.aiState,
         attackCooldown: ball.attackCooldown,
         attackRange: ball.attackRange,
+        aimAngle: ball.aimAngle,
       })),
     }
   }

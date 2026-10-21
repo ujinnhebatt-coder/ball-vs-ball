@@ -6,10 +6,10 @@
 export type BallClassId = 'fire' | 'ice' | 'thunder' | 'nature'
 
 /** State machine AI sesuai GDD bagian 8. */
-export type AIState = 'idle' | 'chase' | 'attack' | 'recover' | 'defeated'
+export type AIState = 'idle' | 'launch' | 'chase' | 'attack' | 'recover' | 'defeated'
 
-/** Fase Puesanan yang sedang berjalan. */
-export type BattlePhase = 'idle' | 'running' | 'finished'
+/** Fase puesanan yang sedang berjalan. */
+export type BattlePhase = 'idle' | 'aim' | 'running' | 'finished'
 
 /** Profil perilaku AI per kelas (GDD: tiap kelas punya prioritas berbeda). */
 export interface AIProfile {
@@ -66,6 +66,10 @@ export interface Ball {
   strokeColor: string
   /** Sisa cooldown serangan dasar (detik). */
   attackCooldown: number
+  /** Arah luncur yang dipilih pemain sebelum duel (radian). */
+  aimAngle: number
+  /** Sisa durasi luncur bebas sebelum AI mengambil alih (detik). */
+  launchTimer: number
   /** Sisa durasi state Recover (detik). */
   recoverTimer: number
   /** Sisa durasi mundur singkat setelah successfully land a hit (detik). */
@@ -91,6 +95,8 @@ export interface HudSnapshot {
     aiState: AIState
     attackCooldown: number
     attackRange: number
+    /** Sudut arah luncur yang dipilih (radian). */
+    aimAngle: number
   }>
 }
 

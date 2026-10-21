@@ -10,17 +10,31 @@ import type { BallClassId, BattleResult } from './types.ts'
 
 type Screen = 'menu' | 'howto' | 'setup' | 'battle'
 
+/** Id bola pertama (Pemain 1) di engine. */
+const FIRST_BALL_ID = 1
+
 export default function App() {
   const [screen, setScreen] = useState<Screen>('menu')
   const [classA, setClassA] = useState<BallClassId>('fire')
   const [classB, setClassB] = useState<BallClassId>('ice')
   const [result, setResult] = useState<BattleResult | null>(null)
+  const [activeBallId, setActiveBallId] = useState(FIRST_BALL_ID)
 
   const handleBattleEnd = useCallback((battleResult: BattleResult) => {
     setResult(battleResult)
   }, [])
 
-  const { engine, hud, restart, togglePause, isPaused, speed, setSpeed } = useGameEngine({
+  const {
+    engine,
+    hud,
+    launch,
+    randomizeAim,
+    restart,
+    togglePause,
+    isPaused,
+    speed,
+    setSpeed,
+  } = useGameEngine({
     classA,
     classB,
     onBattleEnd: handleBattleEnd,
@@ -28,13 +42,15 @@ export default function App() {
 
   const enterBattle = useCallback(() => {
     setResult(null)
+    setActiveBallId(FIRST_BALL_ID)
     setScreen('battle')
-    // Mulai duel baru pada frame berikutnya supaya engine sudah ter-mount.
+    // Siapkan arena di fase aim (menentukan arah) pada frame berikutnya.
     requestAnimationFrame(() => restart())
   }, [restart])
 
   const rematch = useCallback(() => {
     setResult(null)
+    setActiveBallId(FIRST_BALL_ID)
     restart()
   }, [restart])
 
@@ -68,14 +84,18 @@ export default function App() {
 
   return (
     <div className="screen battle-screen">
-      <BattleScreen engine={engine} />
+      <BattleScreen engine={engine} activeBallId={activeBallId} onSelectBall={setActiveBallId} />
       {hud && (
         <BattleHUD
           hud={hud}
           isPaused={isPaused}
           speed={speed}
+          activeBallId={activeBallId}
+          onSelectBall={setActiveBallId}
+          onLaunch={launch}
+          onRandomAim={randomizeAim}
           onTogglePause={togglePause}
-          onRestart={restart}
+          onRestart={rematch}
           onSpeedChange={setSpeed}
           onQuit={() => {
             setResult(null)
