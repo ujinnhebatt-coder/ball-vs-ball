@@ -49,9 +49,25 @@ scripts/
 
 - Damage serangan dasar: `max(1, Attack − Defense)`, cooldown 1 detik.
 - Arena persegi 800 × 800 unit; bola terpantul di dinding dan saling dorong saat bertabrakan.
-- AI memakai finite state machine: `Idle → Chase → Attack → Recover → Defeated`,
+- AI memakai finite state machine: `Idle → Launch → Chase → Attack → Recover → Defeated`,
   dengan profil perilaku berbeda per kelas (agresivitas, jarak preferred, waktu recover).
 - Duel berakhir ketika HP salah satu bola habis.
+
+## Tentukan arah sebelum duel
+
+Sebelum duel dimulai, arena tampil dalam fase **aim**:
+
+1. Setiap bola punya panah arah yang bisa diseret (klik bola juga bisa langsung mengarahkannya).
+2. Sudut terpilih tampil di canvas dan di panel HUD.
+3. Tombol **Acak Arah** mengacak arah kedua bola.
+4. **Mulai Duel** melepas bola: masing-masing meluncur 1,5 detik ke arah yang dipilih
+   (state `Launch`) sebelum AI mengambil alih kendali.
+
+## Visual
+
+Rendering memakai Canvas 2D murni: bola digambar dengan gradasi 3D, specular
+highlight, rim light, dan bayangan jatuh; lantai arena memakai tekstur noise,
+grid, dan vignette; dinding memiliki kedalaman lewat inner shadow dan drop shadow.
 
 ## Kemampuan khusus
 
